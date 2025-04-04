@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,15 +68,48 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+
+    pub fn pop_front(&mut self) -> Option<T> {
+        self.start.map(|node_ptr| unsafe {
+            let node = Box::from_raw(node_ptr.as_ptr());
+            self.start = node.next;
+            if self.start.is_none() {
+                self.end = None;
+            }
+            self.length -= 1;
+            node.val
+        })
+    }
+
+    pub fn peek_front(&self) -> Option<&T> {
+        self.start.map(|node_ptr| unsafe {
+            &(*node_ptr.as_ptr()).val
+        })
+    }
+
+    pub fn merge(mut list_a: LinkedList<T>, mut list_b: LinkedList<T>) -> Self 
+    where
+        T: PartialOrd,
+    {
+        let mut merged = LinkedList::new();
+
+        while let (Some(a_val), Some(b_val)) = (list_a.peek_front(), list_b.peek_front()) {
+            if a_val <= b_val {
+                merged.add(list_a.pop_front().unwrap());
+            } else {
+                merged.add(list_b.pop_front().unwrap());
+            }
         }
-	}
+
+        while let Some(val) = list_a.pop_front() {
+            merged.add(val);
+        }
+        while let Some(val) = list_b.pop_front() {
+            merged.add(val);
+        }
+
+        merged
+    }
 }
 
 impl<T> Display for LinkedList<T>

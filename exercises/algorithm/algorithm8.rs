@@ -2,7 +2,6 @@
 	queue
 	This question requires you to use queues to implement the functionality of the stac
 */
-// I AM NOT DONE
 
 #[derive(Debug)]
 pub struct Queue<T> {
@@ -20,7 +19,7 @@ impl<T> Queue<T> {
         self.elements.push(value)
     }
 
-    pub fn dequeue(&mut self) -> Result<T, &str> {
+    pub fn dequeue(&mut self) -> Result<T, &'static str> {
         if !self.elements.is_empty() {
             Ok(self.elements.remove(0usize))
         } else {
@@ -28,7 +27,7 @@ impl<T> Queue<T> {
         }
     }
 
-    pub fn peek(&self) -> Result<&T, &str> {
+    pub fn peek(&self) -> Result<&T, &'static str> {
         match self.elements.first() {
             Some(value) => Ok(value),
             None => Err("Queue is empty"),
@@ -52,11 +51,12 @@ impl<T> Default for Queue<T> {
     }
 }
 
+#[allow(non_camel_case_types)]
 pub struct myStack<T>
 {
 	//TODO
 	q1:Queue<T>,
-	q2:Queue<T>
+	q2:Queue<T>,
 }
 impl<T> myStack<T> {
     pub fn new() -> Self {
@@ -67,15 +67,38 @@ impl<T> myStack<T> {
         }
     }
     pub fn push(&mut self, elem: T) {
-        //TODO
+        if self.q1.is_empty() {
+            self.q2.enqueue(elem);
+        } else {
+            self.q1.enqueue(elem);
+        }
+        
     }
-    pub fn pop(&mut self) -> Result<T, &str> {
-        //TODO
-		Err("Stack is empty")
+    pub fn pop(&mut self) -> Result<T, &'static str> {
+        if self.is_empty() {
+        	Err("Stack is empty")
+        } else {
+            if !self.q1.is_empty() {
+                let mut size = self.q1.size();
+                while size != 1 {
+                    let e = self.q1.dequeue()?;
+                    self.q2.enqueue(e);
+                    size -= 1;
+                }
+                Ok(self.q1.dequeue()?)
+            } else {
+                let mut size = self.q2.size();
+                while size != 1 {
+                    let e = self.q2.dequeue()?;
+                    self.q1.enqueue(e);
+                    size -= 1;
+                }
+                Ok(self.q2.dequeue()?)               
+            }
+        }
     }
     pub fn is_empty(&self) -> bool {
-		//TODO
-        true
+        self.q1.is_empty() && self.q2.is_empty()
     }
 }
 
